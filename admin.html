@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FoodRush — Admin Dashboard</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* ============================================================
+       ADMIN PANEL — deep teal/navy theme (distinct from user panel)
+       ============================================================ */
+    :root {
+      --admin-primary: #0d6e6e;
+      --admin-dark:    #094f4f;
+      --admin-light:   #e0f4f4;
+      --sidebar-bg:    #0b2d2d;
+      --sidebar-text:  rgba(255,255,255,0.8);
+      --stat-bg:       var(--bg-card);
+    }
+    [data-theme="dark"] {
+      --admin-light: #0b2d2d;
+      --stat-bg:     #1e1e2e;
+    }
+
+    /* Layout */
+    .admin-wrapper { display: flex; min-height: 100vh; }
+
+    /* ---- Sidebar ---- */
+    .admin-sidebar {
+      width: 240px;
+      background: var(--sidebar-bg);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 1.5rem 1.25rem 1rem;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-brand span { color: #4dd; }
+    .sidebar-badge {
+      background: var(--admin-primary);
+      color: #fff;
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      margin-left: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      vertical-align: middle;
+    }
+    .sidebar-nav { padding: 1rem 0; flex: 1; }
+    /* FIX Bug 1 & 3: sidebar links are <button> not <a href="#">
+       so there is no anchor jump, and we never need event.preventDefault() */
+    .sidebar-nav button {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 0.7rem 1.25rem;
+      color: var(--sidebar-text);
+      background: none;
+      border: none;
+      border-left: 3px solid transparent;
+      font-size: 0.88rem;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .sidebar-nav button:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .sidebar-nav button.active {
+      background: rgba(13,110,110,0.3);
+      color: #fff;
+      border-left-color: #4dd;
+    }
+    .sidebar-nav button i { font-size: 1.1rem; width: 20px; }
+    /* External link keeps as <a> but styled the same */
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.7rem 1.25rem;
+      color: var(--sidebar-text);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      border-left: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    .sidebar-nav a:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .sidebar-nav a i { font-size: 1.1rem; width: 20px; }
+    .sidebar-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+    }
+
+    /* ---- Main ---- */
+    .admin-main {
+      flex: 1;
+      background: var(--bg-main);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .admin-topbar {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.85rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .admin-topbar h4 { font-weight: 700; font-size: 1rem; margin: 0; color: var(--text-dark); }
+    .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+    .admin-user-badge {
+      background: var(--admin-light);
+      color: var(--admin-primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.3rem 0.85rem;
+      border-radius: 50px;
+    }
+
+    /* ---- Stat Cards ---- */
+    .stat-card {
+      background: var(--stat-bg);
+      border-radius: var(--radius-md);
+      padding: 1.4rem 1.5rem;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      transition: var(--transition);
+    }
+    .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+    .stat-icon {
+      width: 52px; height: 52px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; flex-shrink: 0;
+    }
+    .stat-icon.teal   { background: #e0f4f4; color: var(--admin-primary); }
+    .stat-icon.pink   { background: #fde8f0; color: var(--pink-primary); }
+    .stat-icon.orange { background: #fff3e0; color: #e65100; }
+    .stat-icon.green  { background: #e8f5e9; color: #2e7d32; }
+    .stat-value { font-size: 1.6rem; font-weight: 800; color: var(--text-dark); line-height: 1.1; }
+    .stat-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+
+    /* ---- Sections ---- */
+    .admin-section        { display: none; }
+    .admin-section.active { display: block; }
+    .admin-content        { padding: 1.5rem; }
+
+    /* ---- Table Card ---- */
+    .admin-table-card {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+    .admin-table-header {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border-color);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap; gap: 0.5rem;
+    }
+    .admin-table-header h5 { font-weight: 700; margin: 0; font-size: 0.95rem; }
+
+    .btn-admin-primary {
+      background: var(--admin-primary);
+      color: #fff; border: none;
+      border-radius: var(--radius-sm);
+      padding: 0.45rem 1rem;
+      font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; transition: var(--transition);
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-admin-primary:hover { background: var(--admin-dark); }
+
+    table { width: 100%; }
+    .admin-table thead th {
+      background: var(--admin-light);
+      color: var(--admin-primary);
+      font-size: 0.78rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+      padding: 0.75rem 1rem; border: none;
+    }
+    .admin-table tbody td {
+      padding: 0.8rem 1rem; font-size: 0.86rem;
+      color: var(--text-dark);
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+    .admin-table tbody tr:last-child td { border-bottom: none; }
+    .admin-table tbody tr:hover { background: rgba(13,110,110,0.04); }
+
+    .food-thumb { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; }
+
+    .badge-available   { background:#d4edda; color:#155724; padding:3px 10px; border-radius:50px; font-size:0.72rem; font-weight:700; }
+    .badge-unavailable { background:#f8d7da; color:#721c24; padding:3px 10px; border-radius:50px; font-size:0.72rem; font-weight:700; }
+
+    .btn-icon {
+      width:32px; height:32px; border:none; border-radius:8px;
+      display:inline-flex; align-items:center; justify-content:center;
+      cursor:pointer; transition:var(--transition); font-size:0.9rem;
+    }
+    .btn-icon.edit   { background:#fff3e0; color:#e65100; }
+    .btn-icon.edit:hover   { background:#e65100; color:#fff; }
+    .btn-icon.delete { background:#fdecea; color:#c62828; }
+    .btn-icon.delete:hover { background:#c62828; color:#fff; }
+
+    /* ---- Form Panel ---- */
+    .form-panel {
+      background: var(--bg-card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      padding: 1.5rem;
+    }
+    .form-panel h5 { font-weight: 700; margin-bottom: 1.25rem; color: var(--admin-primary); }
+
+    /* ---- Order Status ---- */
+    .order-status-badge { padding:3px 10px; border-radius:50px; font-size:0.72rem; font-weight:700; }
+    .status-Processing  { background:#fff3cd; color:#856404; }
+    .status-Delivered   { background:#d4edda; color:#155724; }
+    .status-Cancelled   { background:#f8d7da; color:#721c24; }
+    .status-On-the-Way  { background:#cce5ff; color:#004085; }
+
+    /* ---- Delete Modal ---- */
+    .modal-header { background: #fdecea; }
+    .modal-title  { color: #c62828; font-weight: 700; }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 768px) {
+      .admin-sidebar { display: none; }
+      .admin-sidebar.mobile-open {
+        display: flex; position: fixed;
+        z-index: 1050; top:0; left:0; height:100vh;
+      }
+      .admin-topbar  { padding: 0.75rem 1rem; }
+      .admin-content { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="admin-wrapper">
+
+  <!-- ============================================================
+       SIDEBAR
+       FIX Bug 1+3: nav items are now <button> elements, not
+       <a href="#"> links. No anchor jump, no event needed,
+       showSection() signature simplified back to (name, btnEl).
+       ============================================================ -->
+  <aside class="admin-sidebar" id="adminSidebar">
+    <div class="sidebar-brand">
+      Food<span>Rush</span>
+      <span class="sidebar-badge">Admin</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="active" onclick="showSection('dashboard', this)">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </button>
+      <button onclick="showSection('foods', this)">
+        <i class="bi bi-egg-fried"></i> Food Items
+      </button>
+      <button onclick="showSection('orders', this)">
+        <i class="bi bi-bag-check"></i> Orders
+      </button>
+      <button onclick="showSection('categories', this)">
+        <i class="bi bi-tags"></i> Categories
+      </button>
+      <a href="index.html" target="_blank">
+        <i class="bi bi-box-arrow-up-right"></i> User Panel
+      </a>
+    </nav>
+    <div class="sidebar-footer">FoodRush v1.0 · SP26</div>
+  </aside>
+
+  <!-- ============================================================
+       MAIN CONTENT
+       ============================================================ -->
+  <main class="admin-main">
+
+    <!-- Top Bar -->
+    <div class="admin-topbar">
+      <div class="d-flex align-items-center gap-3">
+        <button class="btn btn-sm btn-outline-secondary d-md-none"
+                onclick="toggleMobileSidebar()">
+          <i class="bi bi-list"></i>
+        </button>
+        <h4 id="pageTitle"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h4>
+      </div>
+      <div class="topbar-right">
+        <button id="adminDarkToggle"
+                style="background:transparent;border:1px solid var(--border-color);
+                       border-radius:50%;width:34px;height:34px;cursor:pointer;
+                       display:flex;align-items:center;justify-content:center;
+                       color:var(--text-dark);transition:all 0.2s;">
+          <i class="bi bi-moon-fill" id="adminDarkIcon"></i>
+        </button>
+        <span class="admin-user-badge"><i class="bi bi-person-fill me-1"></i>Admin</span>
+      </div>
+    </div>
+
+    <div class="admin-content">
+
+      <!-- ====================================================
+           DASHBOARD SECTION
+           ==================================================== -->
+      <div class="admin-section active" id="section-dashboard">
+
+        <!-- Stat Cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+              <div class="stat-icon teal"><i class="bi bi-egg-fried"></i></div>
+              <div>
+                <div class="stat-value" id="statTotalFoods">—</div>
+                <div class="stat-label">Total Food Items</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+              <div class="stat-icon pink"><i class="bi bi-bag-check-fill"></i></div>
+              <div>
+                <div class="stat-value" id="statTotalOrders">—</div>
+                <div class="stat-label">Total Orders</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+              <div class="stat-icon orange"><i class="bi bi-cash-stack"></i></div>
+              <div>
+                <div class="stat-value" id="statRevenue">—</div>
+                <div class="stat-label">Total Revenue (Rs.)</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-xl-3">
+            <div class="stat-card">
+              <div class="stat-icon green"><i class="bi bi-trophy-fill"></i></div>
+              <div>
+                <div class="stat-value" id="statTopFood" style="font-size:1rem;">—</div>
+                <div class="stat-label">Most Ordered Item</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Orders Table -->
+        <div class="admin-table-card">
+          <div class="admin-table-header">
+            <h5><i class="bi bi-clock-history me-2"></i>Recent Orders</h5>
+            <button class="btn-admin-primary" onclick="showSection('orders', document.querySelector('[onclick*=orders]'))">
+              View All
+            </button>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>#</th><th>Customer</th><th>City</th>
+                  <th>Items</th><th>Total</th>
+                  <th>Payment</th><th>Status</th><th>Date</th>
+                </tr>
+              </thead>
+              <tbody id="recentOrdersBody">
+                <tr><td colspan="8" class="text-center py-4 text-muted">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================
+           FOOD ITEMS SECTION
+           ==================================================== -->
+      <div class="admin-section" id="section-foods">
+        <div class="row g-3">
+
+          <!-- Foods Table -->
+          <div class="col-lg-8">
+            <div class="admin-table-card">
+              <div class="admin-table-header">
+                <h5><i class="bi bi-egg-fried me-2"></i>All Food Items</h5>
+                <button class="btn-admin-primary" onclick="openAddFoodForm()">
+                  <i class="bi bi-plus-lg"></i> Add Food
+                </button>
+              </div>
+              <div class="p-3">
+                <input type="text" id="adminFoodSearch" class="form-control"
+                       placeholder="Search food items…" oninput="filterAdminFoods()" />
+              </div>
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Image</th><th>Name</th><th>Category</th>
+                      <th>Restaurant</th><th>Price</th>
+                      <th>Rating</th><th>Status</th><th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="adminFoodsBody">
+                    <tr><td colspan="8" class="text-center py-4 text-muted">Loading…</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add / Edit Form
+               FIX Bug 2 & 10: added fDescription textarea that admin.js reads -->
+          <div class="col-lg-4">
+            <div class="form-panel" id="foodFormPanel">
+              <h5 id="foodFormTitle">
+                <i class="bi bi-plus-circle me-2"></i>Add New Food
+              </h5>
+              <form id="foodForm" novalidate>
+                <input type="hidden" id="editFoodId" />
+
+                <div class="mb-2">
+                  <label class="form-label" for="fName">Food Name *</label>
+                  <input type="text" id="fName" class="form-control"
+                         placeholder="e.g. Chicken Biryani" />
+                  <div class="invalid-feedback" id="fNameErr">Name is required.</div>
+                </div>
+
+                <div class="mb-2">
+                  <label class="form-label" for="fCategory">Category *</label>
+                  <select id="fCategory" class="form-select">
+                    <option value="">-- Select --</option>
+                    <option>Biryani</option>
+                    <option>Karahi</option>
+                    <option>Burgers</option>
+                    <option>Pizza</option>
+                    <option>Nihari</option>
+                    <option>BBQ</option>
+                    <option>Shawarma</option>
+                    <option>Drinks</option>
+                    <option>Desserts</option>
+                    <option>Sandwiches</option>
+                    <option>Fries &amp; Sides</option>
+                  </select>
+                  <div class="invalid-feedback" id="fCategoryErr">Category is required.</div>
+                </div>
+
+                <div class="mb-2">
+                  <label class="form-label" for="fRestaurant">Restaurant *</label>
+                  <input type="text" id="fRestaurant" class="form-control"
+                         placeholder="e.g. Bundu Khan" />
+                  <div class="invalid-feedback" id="fRestaurantErr">Restaurant is required.</div>
+                </div>
+
+                <div class="mb-2">
+                  <label class="form-label" for="fPrice">Price (Rs.) *</label>
+                  <input type="number" id="fPrice" class="form-control"
+                         placeholder="e.g. 450" min="1" />
+                  <div class="invalid-feedback" id="fPriceErr">Enter a valid price.</div>
+                </div>
+
+                <div class="mb-2">
+                  <label class="form-label" for="fRating">Rating (1–5) *</label>
+                  <input type="number" id="fRating" class="form-control"
+                         placeholder="e.g. 4.5" min="1" max="5" step="0.1" />
+                  <div class="invalid-feedback" id="fRatingErr">Enter a rating between 1 and 5.</div>
+                </div>
+
+                <div class="mb-2">
+                  <label class="form-label" for="fImage">Image URL</label>
+                  <input type="text" id="fImage" class="form-control"
+                         placeholder="https://…" />
+                </div>
+
+                <!-- FIX Bug 2: This field was missing; admin.js reads it -->
+                <div class="mb-2">
+                  <label class="form-label" for="fDescription">Description</label>
+                  <textarea id="fDescription" class="form-control" rows="2"
+                            placeholder="Short description…"></textarea>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label" for="fAvailable">Availability</label>
+                  <select id="fAvailable" class="form-select">
+                    <option value="true">Available</option>
+                    <option value="false">Unavailable</option>
+                  </select>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <button type="submit" class="btn-admin-primary flex-fill"
+                          id="foodFormSubmitBtn">
+                    <i class="bi bi-check-lg"></i> Save Food
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary"
+                          onclick="resetFoodForm()">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+                <div id="foodFormMsg" class="mt-2" style="font-size:0.82rem;"></div>
+              </form>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ====================================================
+           ORDERS SECTION
+           ==================================================== -->
+      <div class="admin-section" id="section-orders">
+        <div class="admin-table-card">
+          <div class="admin-table-header">
+            <h5><i class="bi bi-bag-check me-2"></i>All Orders</h5>
+            <span id="ordersCount" class="badge bg-secondary">0 orders</span>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Customer</th>
+                  <th>Phone</th>
+                  <th>City</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Payment</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Delete</th>
+                </tr>
+              </thead>
+              <tbody id="allOrdersBody">
+                <tr><td colspan="10" class="text-center py-4 text-muted">Loading…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================
+           CATEGORIES SECTION
+           ==================================================== -->
+      <div class="admin-section" id="section-categories">
+        <div class="row g-3">
+          <div class="col-md-7">
+            <div class="admin-table-card">
+              <div class="admin-table-header">
+                <h5><i class="bi bi-tags me-2"></i>Categories</h5>
+              </div>
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr><th>ID</th><th>Name</th><th>Actions</th></tr>
+                  </thead>
+                  <tbody id="categoriesBody">
+                    <tr><td colspan="3" class="text-center py-4 text-muted">Loading…</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-5">
+            <div class="form-panel">
+              <h5 id="catFormTitle">
+                <i class="bi bi-plus-circle me-2"></i>Add Category
+              </h5>
+              <form id="categoryForm" novalidate>
+                <input type="hidden" id="editCatId" />
+                <div class="mb-3">
+                  <label class="form-label" for="catName">Category Name *</label>
+                  <input type="text" id="catName" class="form-control"
+                         placeholder="e.g. Desserts" />
+                  <div class="invalid-feedback" id="catNameErr">
+                    Category name is required.
+                  </div>
+                </div>
+                <div class="d-flex gap-2">
+                  <button type="submit" class="btn-admin-primary flex-fill"
+                          id="catSubmitBtn">
+                    <i class="bi bi-check-lg"></i> Save Category
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary"
+                          onclick="resetCategoryForm()">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                </div>
+                <div id="catFormMsg" class="mt-2" style="font-size:0.82rem;"></div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /admin-content -->
+  </main>
+</div>
+
+<!-- ============================================================
+     DELETE CONFIRMATION MODAL
+     ============================================================ -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirm Delete
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p id="deleteModalMessage">
+          Are you sure? This action cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">
+          <i class="bi bi-trash3 me-1"></i> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

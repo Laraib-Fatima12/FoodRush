@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FoodRush — Order Delicious Food Online</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ============================================================
+     NAVBAR
+     ============================================================ -->
+<nav class="navbar navbar-expand-lg foodrush-nav sticky-top">
+  <div class="container">
+    <a class="navbar-brand" href="#">Food<span>Rush</span> 🍕</a>
+    <button class="navbar-toggler border-0" type="button"
+            data-bs-toggle="collapse" data-bs-target="#navbarMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav me-auto ms-3">
+        <li class="nav-item">
+          <a class="nav-link" href="#menuSection"><i class="bi bi-grid me-1"></i>Menu</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#restaurantsSection"><i class="bi bi-shop me-1"></i>Restaurants</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="admin.html" target="_blank"><i class="bi bi-shield-lock me-1"></i>Admin</a>
+        </li>
+      </ul>
+      <div class="d-flex align-items-center gap-2">
+        <button id="darkModeToggle" title="Toggle dark mode">
+          <i class="bi bi-moon-fill" id="darkModeIcon"></i>
+        </button>
+        <button class="btn cart-btn" id="cartToggleBtn">
+          <i class="bi bi-cart3 me-1"></i> Cart
+          <span class="cart-badge" id="cartCount">0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================================================
+     HERO SECTION
+     ============================================================ -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <span class="hero-badge"><i class="bi bi-lightning-fill me-1"></i> Fast Delivery in 30 mins</span>
+        <h1>Hungry? <br><span>Food at your</span> doorstep!</h1>
+        <p>Order from 500+ restaurants across Pakistan. Fresh food delivered hot to your door.</p>
+        <div class="hero-search-wrapper">
+          <i class="bi bi-search text-muted me-2"></i>
+          <input type="text" id="heroSearch"
+                 placeholder="Search for biryani, karahi, burgers…" autocomplete="off" />
+          <button onclick="scrollToMenu()">Search</button>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="num">500+</div><div class="lbl">Restaurants</div>
+          </div>
+          <div class="hero-stat">
+            <div class="num">50K+</div><div class="lbl">Happy Users</div>
+          </div>
+          <div class="hero-stat">
+            <div class="num">30 min</div><div class="lbl">Avg Delivery</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 hero-image-col">
+        <div class="hero-illustration">🍱</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FEATURED RESTAURANTS — dynamic, loaded from /restaurants
+     ============================================================ -->
+<section class="py-5" id="restaurantsSection">
+  <div class="container">
+    <div class="section-divider"></div>
+    <h2 class="section-title">Featured Restaurants</h2>
+    <p class="section-subtitle">Top picks loved by thousands of foodies — click to browse their menu</p>
+    <!-- Dynamic restaurant cards injected by loadRestaurants() in app.js -->
+    <div class="row g-3" id="restaurantsGrid">
+      <p class="text-muted">Loading restaurants…</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOD MENU SECTION
+     ============================================================ -->
+<section class="py-4 bg-light" id="menuSection">
+  <div class="container">
+    <div class="section-divider"></div>
+
+    <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2">
+      <div>
+        <h2 class="section-title mb-0">What's on the Menu?</h2>
+        <p class="section-subtitle mb-0">Browse all 60 items or filter by category / restaurant</p>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <div class="input-group" style="max-width:240px;">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="bi bi-search text-muted"></i>
+          </span>
+          <input type="text" id="menuSearchInput"
+                 class="form-control border-start-0" placeholder="Search foods…" autocomplete="off" />
+        </div>
+        <button class="btn btn-sm btn-outline-secondary" onclick="clearAllFilters()" title="Clear all filters">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Active restaurant filter badge -->
+    <div id="restaurantFilterBadge"
+         style="display:none;align-items:center;gap:0.5rem;
+                background:var(--pink-light);color:var(--pink-dark);
+                padding:0.35rem 1rem;border-radius:50px;
+                font-size:0.82rem;font-weight:600;width:fit-content;margin-bottom:0.5rem;">
+      <i class="bi bi-shop"></i>
+      Showing: <span id="restaurantFilterName"></span>
+      <button id="clearRestaurantFilter" style="background:none;border:none;color:var(--pink-dark);
+              font-size:1rem;line-height:1;cursor:pointer;padding:0;" title="Clear">✕</button>
+    </div>
+
+    <!-- Category Filter Chips -->
+    <div id="categoryFilterRow" class="d-flex gap-2 flex-wrap my-3">
+      <!-- Injected by JS -->
+    </div>
+
+    <!-- Food Grid -->
+    <div id="foodGrid" class="row g-3 mt-1">
+      <!-- Injected by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     CHECKOUT SECTION
+     ============================================================ -->
+<section class="py-5" id="checkoutSection" style="display:none;">
+  <div class="container">
+    <div class="section-divider"></div>
+    <h2 class="section-title">Complete Your Order</h2>
+    <p class="section-subtitle">Fill in your delivery details below</p>
+    <div class="row g-4">
+
+      <!-- Checkout Form -->
+      <div class="col-lg-7">
+        <div class="checkout-card">
+          <h5 class="fw-bold mb-3">
+            <i class="bi bi-person-fill pink-text me-2"></i>Delivery Information
+          </h5>
+          <form id="checkoutForm" novalidate>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="custName">Full Name *</label>
+                <input type="text" id="custName" class="form-control"
+                       placeholder="e.g. Ahmed Raza" />
+                <div class="invalid-feedback" id="custNameError">
+                  Please enter your full name (at least 3 characters).
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="custPhone">Phone Number *</label>
+                <input type="tel" id="custPhone" class="form-control"
+                       placeholder="03XX-XXXXXXX" />
+                <div class="invalid-feedback" id="custPhoneError">
+                  Enter a valid Pakistani number (e.g. 03001234567).
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="custEmail">Email Address *</label>
+                <input type="email" id="custEmail" class="form-control"
+                       placeholder="you@example.com" />
+                <div class="invalid-feedback" id="custEmailError">
+                  Please enter a valid email address.
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="custAddress">Delivery Address *</label>
+                <textarea id="custAddress" class="form-control" rows="2"
+                          placeholder="House no., Street, Block, Area…"></textarea>
+                <div class="invalid-feedback" id="custAddressError">
+                  Please provide your full delivery address (10+ characters).
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="custCity">City *</label>
+                <select id="custCity" class="form-select">
+                  <option value="">-- Select City --</option>
+                  <option>Lahore</option>
+                  <option>Karachi</option>
+                  <option>Islamabad</option>
+                  <option>Faisalabad</option>
+                  <option>Rawalpindi</option>
+                  <option>Multan</option>
+                  <option>Peshawar</option>
+                  <option>Quetta</option>
+                </select>
+                <div class="invalid-feedback" id="custCityError">
+                  Please select your city.
+                </div>
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="custInstructions">
+                  Special Instructions <span class="text-muted">(optional)</span>
+                </label>
+                <input type="text" id="custInstructions" class="form-control"
+                       placeholder="Extra spicy, no onions, ring doorbell…" />
+              </div>
+            </div>
+
+            <h5 class="fw-bold mt-4 mb-3">
+              <i class="bi bi-credit-card-fill pink-text me-2"></i>Payment Method
+            </h5>
+            <div id="paymentError" class="invalid-feedback mb-2">
+              Please select a payment method.
+            </div>
+            <div class="row g-2" id="paymentMethods">
+              <div class="col-6 col-md-3">
+                <div class="payment-option" data-method="Cash on Delivery">
+                  <span class="payment-icon">💵</span> Cash on Delivery
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="payment-option" data-method="JazzCash">
+                  <span class="payment-icon">📱</span> JazzCash
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="payment-option" data-method="Easypaisa">
+                  <span class="payment-icon">🟢</span> Easypaisa
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="payment-option" data-method="Card">
+                  <span class="payment-icon">💳</span> Debit/Credit
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-checkout mt-4" id="placeOrderBtn">
+              <i class="bi bi-bag-check-fill me-2"></i> Place Order
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="col-lg-5">
+        <div class="order-summary-card">
+          <h5 class="fw-bold mb-3">
+            <i class="bi bi-receipt pink-text me-2"></i>Order Summary
+          </h5>
+          <div id="checkoutItemsList"></div>
+          <div class="order-total-section">
+            <div class="total-line">
+              <span>Subtotal</span><span id="summarySubtotal">Rs. 0</span>
+            </div>
+            <div class="total-line">
+              <span>Delivery Fee</span><span id="summaryDelivery">Rs. 0</span>
+            </div>
+            <div class="total-line">
+              <span>Tax (5%)</span><span id="summaryTax">Rs. 0</span>
+            </div>
+            <div class="grand-total-line">
+              <span>Grand Total</span><span id="summaryGrand">Rs. 0</span>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-outline-secondary w-100 mt-3" id="backToMenuBtn">
+          <i class="bi bi-arrow-left me-1"></i> Back to Menu
+        </button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer class="foodrush-footer">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="footer-brand">Food<span>Rush</span> 🍕</div>
+        <p style="font-size:0.85rem;margin-top:0.5rem;">
+          Pakistan's fastest food delivery platform. Fresh, hot, and on time — every time.
+        </p>
+      </div>
+      <div class="col-md-2">
+        <h6 class="text-white fw-bold mb-2">Quick Links</h6>
+        <div class="footer-links">
+          <a href="#menuSection">Menu</a>
+          <a href="#restaurantsSection">Restaurants</a>
+          <a href="admin.html" target="_blank">Admin</a>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <h6 class="text-white fw-bold mb-2">Cities We Serve</h6>
+        <div class="footer-links">
+          <a href="#">Lahore</a>
+          <a href="#">Karachi</a>
+          <a href="#">Islamabad</a>
+          <a href="#">Faisalabad</a>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <h6 class="text-white fw-bold mb-2">Contact</h6>
+        <div class="footer-links">
+          <a href="#"><i class="bi bi-telephone me-1"></i> 0800-FOODRUSH</a>
+          <a href="#"><i class="bi bi-envelope me-1"></i> help@foodrush.pk</a>
+          <a href="#"><i class="bi bi-instagram me-1"></i> @foodrush.pk</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2025 FoodRush Pakistan. All rights reserved.
+      Built with ❤️ for Web Technologies SP26.
+    </div>
+  </div>
+</footer>
+
+<!-- ============================================================
+     CART SIDEBAR
+     ============================================================ -->
+<div class="cart-overlay" id="cartOverlay"></div>
+<aside class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h5><i class="bi bi-cart3 me-2"></i>Your Cart</h5>
+    <button class="cart-close-btn" id="cartCloseBtn"><i class="bi bi-x-lg"></i></button>
+  </div>
+  <div class="cart-items-container" id="cartItemsList"></div>
+  <div class="cart-footer" id="cartFooter" style="display:none;">
+    <div class="cart-summary-row">
+      <span>Subtotal</span><span id="cartSubtotal">Rs. 0</span>
+    </div>
+    <div class="cart-summary-row">
+      <span>Delivery Fee</span><span id="cartDelivery">Rs. 0</span>
+    </div>
+    <div class="cart-summary-row">
+      <span>Tax (5%)</span><span id="cartTax">Rs. 0</span>
+    </div>
+    <div class="cart-total-row">
+      <span>Grand Total</span><span id="cartGrandTotal">Rs. 0</span>
+    </div>
+    <button class="btn-checkout" id="proceedCheckoutBtn">
+      <i class="bi bi-bag-check-fill me-2"></i> Proceed to Checkout
+    </button>
+  </div>
+</aside>
+
+<!-- Toast -->
+<div class="success-toast" id="successToast">
+  <i class="bi bi-check-circle-fill"></i>
+  <span id="successToastMsg">Order placed successfully!</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
